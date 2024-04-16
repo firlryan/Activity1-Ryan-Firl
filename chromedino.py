@@ -1,5 +1,3 @@
-# !/usr/bin/python
-# -*- coding: utf-8 -*-
 import datetime
 import os
 import random
@@ -10,11 +8,9 @@ import pygame
 pygame.init()
 
 # Global Constants
-
 SCREEN_HEIGHT = 600
 SCREEN_WIDTH = 1100
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
 
 pygame.display.set_caption("Chrome Dino Runner")
 
@@ -51,13 +47,10 @@ CLOUD = pygame.image.load(os.path.join("assets/Other", "Cloud.png"))
 
 BG = pygame.image.load(os.path.join("assets/Other", "Track.png"))
 
-
 FONT_COLOR = (0, 0, 0)
 
 
-
 class Dinosaur:
-
     X_POS = 80
     Y_POS = 310
     Y_POS_DUCK = 340
@@ -76,9 +69,9 @@ class Dinosaur:
         self.jump_vel = self.JUMP_VEL
 
         self.image = self.run_img[0].convert_alpha()
-        # Apply a red overlay
-        self.image.fill((255, 0, 0, 128), special_flags=pygame.BLEND_RGBA_MULT)
+        self.image.fill((255, 50, 50, 128), special_flags=pygame.BLEND_RGBA_MULT)
 
+        self.dino_rect = self.image.get_rect()
 
     def update(self, userInput):
         if self.dino_duck:
@@ -104,14 +97,17 @@ class Dinosaur:
             self.dino_run = True
             self.dino_jump = False
 
+        # Apply red overlay after updating image
+        self.image.fill((255, 50, 50, 128), special_flags=pygame.BLEND_RGBA_MULT)
+
     def duck(self):
+        self.image = self.duck_img[self.step_index // 5]
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.X_POS
         self.dino_rect.y = self.Y_POS_DUCK
         self.step_index += 1
 
     def run(self):
-
         self.image = self.run_img[self.step_index // 5]
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.X_POS
@@ -119,7 +115,6 @@ class Dinosaur:
         self.step_index += 1
 
     def jump(self):
-
         self.image = self.jump_img
         if self.dino_jump:
             self.dino_rect.y -= self.jump_vel * 4
@@ -131,16 +126,12 @@ class Dinosaur:
     def draw(self, SCREEN):
         SCREEN.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
 
-
 class Cloud:
     def __init__(self):
         self.x = SCREEN_WIDTH + random.randint(800, 1000)
         self.y = random.randint(50, 100)
         self.image = CLOUD.convert_alpha()
-        # Apply a blue overlay
         self.image.fill((0, 0, 255, 128), special_flags=pygame.BLEND_RGBA_MULT)
-
-
         self.width = self.image.get_width()
 
     def update(self):
@@ -151,7 +142,6 @@ class Cloud:
 
     def draw(self, SCREEN):
         SCREEN.blit(self.image, (self.x, self.y))
-
 
 class Obstacle:
     def __init__(self, image, type):
@@ -168,20 +158,17 @@ class Obstacle:
     def draw(self, SCREEN):
         SCREEN.blit(self.image[self.type], self.rect)
 
-
 class SmallCactus(Obstacle):
     def __init__(self, image):
         self.type = random.randint(0, 2)
         super().__init__(image, self.type)
         self.rect.y = 325
 
-
 class LargeCactus(Obstacle):
     def __init__(self, image):
         self.type = random.randint(0, 2)
         super().__init__(image, self.type)
         self.rect.y = 300
-
 
 class Bird(Obstacle):
     BIRD_HEIGHTS = [250, 290, 320]
@@ -221,16 +208,21 @@ def main():
             game_speed += 1
         current_time = datetime.datetime.now().hour
         with open("score.txt", "r") as f:
-
-            score_ints = [int(x) for x in f.read().split()]  
-            highscore = max(score_ints)
-            if points > highscore:
-                highscore=points 
-            text = font.render("High Score: "+ str(highscore) + "  Points: " + str(points), True, FONT_COLOR)
+            score_str = f.read()
+            if score_str:
+                score_ints = [int(x) for x in score_str.split()]
+                highscore = max(score_ints)
+                if points > highscore:
+                    highscore = points
+                text = font.render("High Score: " + str(highscore) + "  Points: " + str(points), True, FONT_COLOR)
+            else:
+                highscore = 0
+                text = font.render("High Score: " + str(highscore) + "  Points: " + str(points), True, FONT_COLOR)
 
         textRect = text.get_rect()
         textRect.center = (900, 40)
         SCREEN.blit(text, textRect)
+
 
     def background():
         global x_pos_bg, y_pos_bg
